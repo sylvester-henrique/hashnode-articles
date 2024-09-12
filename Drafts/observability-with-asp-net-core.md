@@ -21,3 +21,38 @@ public async Task<IActionResult> GetAsync()
 
 ### Open Telemetry
 
+The next step is to configure the application to generate metrics. Open Telemetry will be used for that, which is an open source platform of observability, technology agnostic, that supports log, metrics and distributed tracings. ASP NET Core has its Open Telemetry implementation, in the following packages:
+
+```
+OpenTelemetry.Instrumentation.AspNetCore
+OpenTelemetry.Extensions.Hosting
+OpenTelemetry.Exporter.Console
+```
+
+After installing these packages, add the following configuration to de dependency injection container configuration:
+
+```cs
+var openTelemetryBuilder = builder.Services.AddOpenTelemetry();
+
+openTelemetryBuilder.ConfigureResource(resource => resource
+    .AddService(builder.Environment.ApplicationName));
+
+openTelemetryBuilder.WithMetrics(metrics => metrics
+    .AddAspNetCoreInstrumentation()
+    .AddConsoleExporter());
+```
+
+This configuration adds some metrics  by default. We will be looking at the one called `http.server.request.duration`. As the name suggests, this metric measures the request duration which is in seconds.
+
+Since we have added the ```AddConsoleExporter``` to the configuration, a console exporter will be available. An exporter is a way of accessing the snapshot of the metrics at a given period in time. The console exporter will output the metrics from time to time.
+
+This is the console output after doing three request to the ```/api/Producs``` endpoint:
+
+![](http-server-request-duration-console.png)
+
+- The type of this metric is Histogram. It registers frequency of values within a range.
+- Note that we have defined ranges of values and a number for it. These ranges of values are called buckets. In this example, two of these requests took between 0.75 and 1 second, and the other one took between 1.2 and 5 seconds.
+- We have additional information attached to the metrics, for example the `http.response.status_code` and `http.route`. These information are called tags, and can be useful for filtering data.
+
+### Prometheus
+
