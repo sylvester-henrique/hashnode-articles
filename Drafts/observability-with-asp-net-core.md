@@ -56,3 +56,56 @@ This is the console output after doing three request to the ```/api/Producs``` e
 
 ### Prometheus
 
+Now that the application is instrumenting the metrics, we need a system to collect them, we will be using Prometheus, which uses a pulling system to scrap the metrics of an application. In order for Prometheus to scrap the metrics it is necessary to configure an exporter, that will provide an endpoint for the scrapping. I'll install the package to configure the exporter endpoint:
+
+`OpenTelemetry.Exporter.Prometheus.AspNetCore`
+
+Add the `AddPrometheusExporter` call to the dependency injection container:
+
+
+```cs
+openTelemetryBuilder.WithMetrics(metrics => metrics
+    .AddAspNetCoreInstrumentation()
+    .AddConsoleExporter()
+    .AddPrometheusExporter());
+```
+
+And the `MapPrometheusScrapingEndpoint` call somewhere after the `Build` call:
+
+```cs
+var app = builder.Build();
+...
+// Configure the Prometheus scraping endpoint
+app.MapPrometheusScrapingEndpoint();
+```
+
+Now, the metrics will be available at `/metrics` endpoint.
+
+The next step is to install Prometheus. After the installation it is necessary to specify the target for the scrapping endpoint in the Prometheus YAML file. In this case the target is `localhost:5068`. Besides, for testing purposes I defined the scrape interval of 5s. That means that Prometheus will do the pulling at every 5 seconds:
+
+```yaml
+scrape_interval: 5s
+
+scrape_configs:
+  - job_name: "prometheus"
+    static_configs:
+      - targets: ["localhost:5068"]
+```
+
+After running Prometheus access its default endpoint at `http://localhost:9090`. On the Prometheus interface it is possible to query metrics using the PromQL language. Also, it is possible to view a graphic for the metric over time.
+
+For exemplification, I'll be sending a request to the `/api/Products` endpoint, every 3 seconds, using Postman. Meanwhile I'll be filtering the request duration average in Prometheus for that endpoint, using the PromQL query:
+
+```yml
+increase(http_server_request_duration_seconds_sum{http_route='api/Products'}[5m])
+/
+increase(http_server_request_duration_seconds_count{http_route='api/Products'}[5m])
+```
+
+This query is the division of increase of request duration sum in the last 5 minutes per the increase of the request duration count in the last 5 minutes. The result is the average request duration in this period of time. See the Prometheus graph:
+
+![](http-server-request-duration-prometheus.png)
+
+Note that at `00:19:43` the request duration average was =~ `1.48` seconds.
+
+### Grafana
