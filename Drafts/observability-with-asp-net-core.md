@@ -81,7 +81,7 @@ app.MapPrometheusScrapingEndpoint();
 
 Now, the metrics will be available at `/metrics` endpoint.
 
-The next step is to install Prometheus. After the installation it is necessary to specify the target for the scrapping endpoint in the Prometheus YAML file. In this case the target is `localhost:5068`. Besides, for testing purposes I defined the scrape interval of 5s. That means that Prometheus will do the pulling at every 5 seconds:
+The next step is to install Prometheus. After the installation it is necessary to specify the target for the scrapping endpoint in the Prometheus YAML file. The target is `localhost:5068`, which is the URL the ShopSports API is running. Besides, for testing purposes I defined the scrape interval of 5s. That means that Prometheus will do the pulling at every 5 seconds:
 
 ```yaml
 scrape_interval: 5s
@@ -102,10 +102,10 @@ increase(http_server_request_duration_seconds_sum{http_route='api/Products'}[5m]
 increase(http_server_request_duration_seconds_count{http_route='api/Products'}[5m])
 ```
 
-This query is the division of increase of request duration sum in the last 5 minutes per the increase of the request duration count in the last 5 minutes. The result is the average request duration in this period of time. See the Prometheus graph:
+First, the query calculates the increase of the sum of all request durations in an interval of 5 minutes. Then, it calculates the increase in the last 5 minutes, of count of all requests. Finally, it divides those values to get the average request duration in the informed interval. This is the resultant Prometheus graph:
 
 ![](http-server-request-duration-prometheus.png)
 
-Note that at `00:19:43` the request duration average was =~ `1.48` seconds.
+Note that at `00:19:43` the request duration average was ≈ `1.48` seconds.
 
 ### Grafana
