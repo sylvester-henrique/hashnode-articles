@@ -44,11 +44,11 @@ openTelemetryBuilder.WithMetrics(metrics => metrics
 
 This configuration adds some metrics by default. We will be looking at the one called `http.server.request.duration`. As the name suggests, this metric measures the request duration which is in seconds.
 
-Since we have added the ```AddConsoleExporter``` to the configuration, a console exporter will be available. An exporter is a way of accessing the snapshot of the metrics at a given period in time. The console exporter will output the metrics from time to time.
+Since we have added the `AddConsoleExporter` to the configuration, a console exporter will be available. An exporter is a way of accessing the snapshot of the metrics at a given period in time. The console exporter will output the metrics from time to time.
 
-This is the console output after doing three request to the ```/api/Producs``` endpoint:
+This is the console output after doing three request to the `/api/Producs` endpoint:
 
-![](http-server-request-duration-console.png)
+![Console exporter](https://raw.githubusercontent.com/sylvester-henrique/hashnode-articles/main/Drafts/http-server-request-duration-console.png)
 
 - The type of this metric is Histogram. It registers frequency of values within a range.
 - Note that we have defined ranges of values and a number for it. These ranges of values are called buckets. In this example, two of these requests took between 0.75 and 1 second, and the other one took between 1.2 and 5 seconds.
@@ -97,16 +97,16 @@ After running Prometheus access its default endpoint at `http://localhost:9090`.
 For exemplification, I'll be sending a request to the `/api/Products` endpoint, every 3 seconds, using Postman. Meanwhile I'll be filtering the request duration average in Prometheus for that endpoint, using the PromQL query:
 
 ```
-increase(http_server_request_duration_seconds_sum{http_route='api/Products'}[5m])
+increase(http_server_request_duration_seconds_sum{http_route='api/Products',http_response_status_code='200'}[5m])
 /
-increase(http_server_request_duration_seconds_count{http_route='api/Products'}[5m])
+increase(http_server_request_duration_seconds_count{http_route='api/Products',http_response_status_code='200'}[5m])
 ```
 
 First, the query calculates the increase of the sum of all request durations in an interval of 5 minutes. Then, it calculates the increase in the last 5 minutes, of count of all requests. Finally, it divides those values to get the average request duration in the informed interval. This is the resultant Prometheus graph:
 
-![](http-server-request-duration-prometheus.png)
+![Prometheus graph](https://raw.githubusercontent.com/sylvester-henrique/hashnode-articles/main/Drafts/http-server-request-duration-prometheus.png)
 
-Note that at `00:19:43` the request duration average was ≈ `1.48` seconds.
+Note that at `21:10:50` the request duration average was ≈ `1.62` seconds.
 
 ### Grafana
 
@@ -124,9 +124,9 @@ histogram_quantile(0.9, sum by(le) (rate(http_server_request_duration_seconds_bu
 
 In a single Grafana dashboard is possible to specify multiple queries, this is the dashboard for the P90, P95 and P99:
 
-![](http-server-request-duration-grafana.png)
+![Grafana http server request duration](https://raw.githubusercontent.com/sylvester-henrique/hashnode-articles/main/Drafts/http-server-request-duration-grafana.png)
 
-As we can see at `11:59:30` 90% of the request durations took less than `2.42` seconds. This dashboard is very useful to give an overview of how most of the clients of the API are experience it in terms of request duration.
+As we can see at `18:14:15` 90% of the request durations took less than `2.41` seconds. This dashboard is very useful to give an overview of how most of the clients of the API are experience it in terms of request duration.
 
 > MAYBE SHOW THE AVG METRIC
 
@@ -210,8 +210,8 @@ increase(get_products_error_count_total{getProductError="FillPrices"}[5m])
 
 In the Grafana dashboard we can visualize error counts for the three specified error:
 
-![](get-products-error-count-grafana.png)
+![Grafana get products error count](https://raw.githubusercontent.com/sylvester-henrique/hashnode-articles/main/Drafts/get-products-error-count-grafana.png)
 
-We can see that at `16:50:15` the error count for `FillPrices` error was ≈ 2, the error count for `QueryProducts` was ≈ 1, while there was no `FillAvailability` errors. After that, all errors began to increase. This is useful to know what types of errors occur the most in our application. By knowing that we could increase the resilience of the application in critical points.
+We can see that at `18:04:00` the error count for `QueryProducts` error was ≈ 3, the error count for `FillPrices` was ≈ 2, while there was no `FillAvailability` errors. After that, all errors began to increase. This is useful to know what types of errors occur the most in our application. By knowing that we could increase the resilience of the application in critical points.
 
 ### Conclusion
