@@ -31,7 +31,7 @@ OpenTelemetry.Exporter.Console
 
 After installing these packages, add the following configuration to de dependency injection container configuration:
 
-```cs
+```csharp
 var openTelemetryBuilder = builder.Services.AddOpenTelemetry();
 
 openTelemetryBuilder.ConfigureResource(resource => resource
@@ -63,7 +63,7 @@ Now that the application is instrumenting the metrics, we need a system to colle
 Add the `AddPrometheusExporter` call to the dependency injection container:
 
 
-```cs
+```csharp
 openTelemetryBuilder.WithMetrics(metrics => metrics
     .AddAspNetCoreInstrumentation()
     .AddConsoleExporter()
@@ -72,7 +72,7 @@ openTelemetryBuilder.WithMetrics(metrics => metrics
 
 And the `MapPrometheusScrapingEndpoint` call somewhere after the `Build` call:
 
-```cs
+```csharp
 var app = builder.Build();
 ...
 // Configure the Prometheus scraping endpoint
@@ -96,7 +96,7 @@ After running Prometheus access its default endpoint at `http://localhost:9090`.
 
 For exemplification, I'll be sending a request to the `/api/Products` endpoint, every 3 seconds, using Postman. Meanwhile I'll be filtering the request duration average in Prometheus for that endpoint, using the PromQL query:
 
-```yml
+```
 increase(http_server_request_duration_seconds_sum{http_route='api/Products'}[5m])
 /
 increase(http_server_request_duration_seconds_count{http_route='api/Products'}[5m])
@@ -140,7 +140,7 @@ In the following exemple, we will modify the code to generate random errors in t
 - When getting prices in the PriceService
 - When retrieving availabilities in the InventoryService
 
-```cs
+```csharp
 // Helper class to generate errors.
 public static class ErrorGenerator
 {
@@ -159,7 +159,7 @@ ErrorGenerator.Execute(3, "Failed to fill products availability.");
 
 And create the custom metric class for the `/api/Products` endpoint. Also, an enum for the error types:
 
-```cs
+```csharp
 public class ProductsMetrics : IProductsMetrics
 {
     private const string NAME = "Get.Products";
@@ -192,7 +192,7 @@ The name of the metric is `get.products.error.count`, which is a counter, and th
 
 Finally add the metric to the `openTelemetryBuilder` using the `AddMeter` method:
 
-```cs
+```csharp
 var customMetricsNames = new string[] { ProductsMetrics.Name };
 
 openTelemetryBuilder.WithMetrics(metrics => metrics
