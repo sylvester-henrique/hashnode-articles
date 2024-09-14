@@ -109,3 +109,25 @@ First, the query calculates the increase of the sum of all request durations in 
 Note that at `00:19:43` the request duration average was ≈ `1.48` seconds.
 
 ### Grafana
+
+Although it is possible to build graphs for our metrics using Prometheus, as seen previously, we also can use Grafana for that, which has a more robust system for creating monitoring dashboards, alerts, and has a richer user interface.
+
+After installing Grafana, we need to configure a datasource in which it will be getting the monitoring data. In the datasource configuration of Grafana choose Prometheus, and specify our Prometheus endpoint which is `http://localhost:9090`.
+
+Now, we'll be creating a dashboard for the request duration metric. One way of viewing samples of request duration over time is using the `histogram_quantile` funcion. The first param for this function is the percentile. For example, when the percentile 90 shows 2 seconds, this indicates that 90% of the request took util 2 seconds, while only 10% took more than that.
+
+These are the queries for percentile 90 (P90):
+
+```
+histogram_quantile(0.9, sum by(le) (rate(http_server_request_duration_seconds_bucket{http_route="api/Products", http_response_status_code="200"}[$__rate_interval])))
+```
+
+In a single Grafana dashboard is possible to specify multiple queries, this is the dashboard for the P90, P95 and P99:
+
+![](http-server-request-duration-grafana.png)
+
+As we can see at `11:59:30` 90% of the request durations took less than `2.42` seconds. This dashboard is very useful to give an overview of how most of the clients of the API are experience it in terms of request duration.
+
+> MAYBE SHOW THE AVG METRIC
+
+### Custom metrics
