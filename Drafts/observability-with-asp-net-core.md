@@ -1,6 +1,6 @@
 It is crucial to understand an application's behavior, either to analyze specific events to find errors, monitor the application's performance, or track activities in a distributed system. Observability is the capability of an application to do that, through logs, metrics, and tracing.
 
-In this article I’ll be talking about metrics, how to configure an ASP NET Core application to generate metrics, set up Prometheus and Grafana to collect and visualize the metrics.
+In this article I’ll be talking about metrics, how important and powerful they can be, and showing how it can be used, showing its usage in a real scenario. For that, we will be configuring an ASP NET Core application to generate metrics and set up Prometheus and Grafana to collect and visualize the metrics.
 
 Metrics are the application's telemetry data over time. For example, the number of requests of an API, the number of errors, and the latency of the request. It is essential to collect that data and monitor it, for example to react to application degradation incidents or understand the application behavior to implement performance improvements.
 
@@ -231,6 +231,14 @@ In the Grafana dashboard we can visualize error counts for the three specified e
 
 ![Grafana get products error count](https://raw.githubusercontent.com/sylvester-henrique/hashnode-articles/main/Drafts/get-products-error-count-grafana.png)
 
-We can see that at `18:04:00` the count for `QueryProducts` error was ≈ 3, the count for `FillPrices` error was ≈ 2, while there was no `FillAvailability` errors.. This is useful to know what types of errors occur the most in our application. With these information, we could take actions to reduce specific errors, in order to increase the resilience of the application.
+We can see that at `18:04:00` the count for `QueryProducts` error was ≈ 3, the count for `FillPrices` error was ≈ 2, while there was no `FillAvailability` errors. 
 
 ### Conclusion
+
+We have seen the request duration metric, which later can be very useful for querying request duration average, and request count for multiple endpoints. This information will help us to identify which endpoints have the high average durations, and which endpoints have the higher number of requests. Combining these two information we can take action to optimize performance of critical endpoints with high numbers of requests that also have high average request duration. 
+
+We have also seen the error count metric, which is a custom metric for the application. With this information, we could take actions to reduce specific errors that are occurring the most, in order to increase the resilience of the application.
+
+Another scenario is when degradation incidents occur. Those metrics can help us to identify which point of the application is responsible for the degradation. In addition, Grafana provides a way to alarm when a metric surpases a determined threshold, which can indicate that an application will begin to degrade soon.
+
+This code shown here can be found in this repository: https://github.com/sylvester-henrique/asp-net-core-metrics-example-1.
