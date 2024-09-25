@@ -243,4 +243,4 @@ We have also seen the error count metric, which is a custom metric for the appli
 
 Another scenario is when degradation incidents occur. Those metrics can help us to identify which point of the application is responsible for the degradation. In addition, Grafana provides a way to alarm when a metric surpasses a determined threshold, which can indicate that an application will begin to degrade soon.
 
-The code shown here can be found at this repository: https://github.com/sylvester-henrique/asp-net-core-metrics-example-1.
+The code shown here can be found at this repository: [asp-net-core-metrics-example-1](https://github.com/sylvester-henrique/asp-net-core-metrics-example-1)
