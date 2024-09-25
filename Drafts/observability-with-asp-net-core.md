@@ -1,14 +1,14 @@
 It is crucial to understand an application's behavior, either to analyze specific events to find errors, monitor the application's performance, or track activities in a distributed system. Observability is the capability of an application to do that, through logs, metrics, and tracing.
 
-In this article I’ll be talking about metrics, how important and powerful they can be, and showing how it can be used, showing its usage in a real scenario. For that, we will be configuring an ASP NET Core application to generate metrics and set up Prometheus and Grafana to collect and visualize the metrics.
+In this article I’ll be talking about metrics, how important and powerful they can be, and showing how they can be used, showing its usage in a real scenario. For that, we will be configuring an ASP NET Core application to generate metrics and set up Prometheus and Grafana to collect and visualize the metrics.
 
-Metrics are the application's telemetry data over time. For example, the number of requests of an API, the number of errors, and the latency of the request. It is essential to collect that data and monitor it, for example to react to application degradation incidents or understand the application behavior to implement performance improvements.
+Metrics are the application's telemetry data over time. For example, the number of requests of an API, the number of errors, and the latency of the request. It is essential to collect that data and monitor it, for example, to react to application degradation incidents or understand the application behavior to implement performance improvements.
 
 ### Creating an API
 
-The first step here is to create an API using ASP NET Core. I created an API for a fictitious sporting goods store called ShopSports. It has an `/api/Products` endpoint that returns a list of products, containing the name, price and availability. This API needs to communicate with two external services, one for retrieving the products prices, and another to get the procuts availability.
+The first step here is to create an API using ASP NET Core. I made an API for a fictitious sporting goods store called ShopSports. It has an `/api/Products` endpoint that returns a list of products, containing the name, price and availability. This API needs to communicate with two external services, one for retrieving the prices of the products, and another to get the procuts's availability.
 
-In order to simulate a real use scenario, this API generates random delays during the products query to the database in the `ProductRepository`, and delays when retrieving data in `PriceService` and `InventoryService`. This is the products API implementation:
+To simulate a real-use scenario, this API generates random delays during the products query to the database in the `ProductRepository`, and delays when retrieving data in `PriceService` and `InventoryService`. This is the products API implementation:
 
 ```csharp
 public async Task<IActionResult> GetAsync()
@@ -23,7 +23,7 @@ public async Task<IActionResult> GetAsync()
 
 ### Open Telemetry
 
-The next step is to configure the application to generate metrics. Open Telemetry will be used for that, which is an open source platform for observability, it is technology agnostic, supports log, metrics and distributed tracings. ASP NET Core has its Open Telemetry implementation, we just need to install the following packages:
+The next step is to configure the application to generate metrics. Open Telemetry will be used for that, which is an open-source platform for observability, it is technology agnostic, supports logs, metrics and distributed tracings. ASP NET Core has its Open Telemetry implementation, we add it by installing the following packages:
 
 ```
 OpenTelemetry.Instrumentation.AspNetCore
@@ -46,15 +46,15 @@ openTelemetryBuilder.WithMetrics(metrics => metrics
 
 This configuration adds some metrics by default. We will be looking at the one called `http.server.request.duration`. As the name suggests, this metric measures the request duration in seconds.
 
-As we have added the `AddConsoleExporter` to the configuration, a console exporter will be available. An exporter is a way of accessing the snapshot of the metrics at a given time. The console exporter will output the metrics from time to time. This is the console output after doing three request to the `/api/Producs` endpoint:
+As we have added the `AddConsoleExporter` to the configuration, a console exporter will be available. An exporter is a way of accessing the snapshot of the metrics at a given time. The console exporter will output the metrics from time to time. This is the console output after making three request to the `/api/Producs` endpoint:
 
 ![Console exporter](https://raw.githubusercontent.com/sylvester-henrique/hashnode-articles/main/Drafts/http-server-request-duration-console.png)
 
 I highlight three points:
 
-- The type of this metric is Histogram, which registers frequency of values within a range.
-- Note that we have defined ranges of values and a number for it. These ranges of values are called buckets. In this example, two of these requests took between 0.75 and 1 second, and the other one took between 1.2 and 5 seconds.
-- We have additional information attached to the metrics, for example the `http.response.status_code` and `http.route`. These information are called tags, and can be useful for filtering data.
+- The type of this metric is Histogram, which registers the frequency of values within a range.
+- Note that we have defined ranges of values and a number for each range. These ranges of values are called buckets. In this example, two of these requests took between 0.75 and 1 second, and the other took between 1.2 and 5 seconds.
+- We have additional information attached to the metrics, for example, the `http.response.status_code` and `http.route`. These information are called tags, and can be useful for filtering data.
 
 ### Prometheus
 
@@ -82,7 +82,7 @@ app.MapPrometheusScrapingEndpoint();
 
 Now, the metrics will be available at `/metrics` endpoint.
 
-The next step is to install Prometheus. After the installation it is necessary to specify the target for the scrapping endpoint in the Prometheus YAML file. The target is `localhost:5068`, which is the URL that ShopSports API is running. Besides, for testing purposes I defined the scrape interval of 5s. That means that Prometheus will do the pulling at every 5 seconds:
+The next step is to install Prometheus. After the installation, it is necessary to specify the target for the scrapping endpoint in the Prometheus YAML file. The target is `localhost:5068`, which is the URL that ShopSports API is running. Besides, for testing purposes, I defined the scrape interval of 5s. That means that Prometheus will do the pulling at every 5 seconds:
 
 ```yaml
 scrape_interval: 5s
@@ -93,9 +93,9 @@ scrape_configs:
       - targets: ["localhost:5068"]
 ```
 
-After running Prometheus, access its default endpoint at `http://localhost:9090`. On the Prometheus interface it is possible to query metrics using the PromQL language. Also, we are able to view a graphic for the metric over time.
+After running Prometheus, access its default endpoint at `http://localhost:9090`. On the Prometheus interface, it is possible to query metrics using the PromQL language. Also, we can view a graphic for the metric over time.
 
-For exemplification, I'll be sending a request to the `/api/Products` endpoint, every 3 seconds, using Postman. Meanwhile I'll be filtering the request duration average in Prometheus for that endpoint, using the PromQL query:
+For exemplification, I'll be sending a request to the `/api/Products` endpoint, every 3 seconds, using Postman. Meanwhile, I'll be filtering the request duration average in Prometheus for that endpoint, using the PromQL query:
 
 ```
 increase(http_server_request_duration_seconds_sum{http_route='api/Products',http_response_status_code='200'}[5m])
@@ -115,7 +115,7 @@ Although it is possible to build graphs for our metrics using Prometheus, as see
 
 After installing Grafana, we need to configure a datasource in which it will be getting the monitoring data. In Grafana's datasource configuration choose Prometheus, and specify our Prometheus endpoint which is `http://localhost:9090`.
 
-Now, we'll be creating a dashboard for the request duration metric. One way of viewing samples of request duration over time is using the `histogram_quantile` funcion. The first param for this function is the percentile. For example, when the percentile 95 shows 2 seconds, this indicates that 95% of the request took below 2 seconds, while only 5% took 2 seconds or more. For example, this is the query for percentile 95 (P95):
+Now, we'll be creating a dashboard for the request duration metric. One way of viewing samples of request duration over time is using the `histogram_quantile` function. The first parameter for this function is the percentile. For example, when the percentile 95 shows 2 seconds, this indicates that 95% of the requests took below 2 seconds, while only 5% took 2 seconds or more. For example, this is the query for percentile 95 (P95):
 
 ```
 histogram_quantile(0.95, sum by(le) (increase(http_server_request_duration_seconds_bucket{http_route="api/Products", http_response_status_code="200"}[5m])))
@@ -129,9 +129,9 @@ As we can see in the yellow line, at `18:14:15` 95% of the request durations too
 
 ### Custom metrics
 
-In the first example we used a default metric generated by the Open Telemetry implementation for ASP NET Core. Besides that, it is possible to create custom metrics to instrument specific events in our applications. For example, a metric to count errors in specific scenarios.
+In the first example, we used a default metric generated by the Open Telemetry implementation for ASP NET Core. Besides that, it is possible to create custom metrics to instrument specific events in our applications. For example, a metric to count errors in specific scenarios.
 
-In the following exemple, we will modify the code to generate random errors in three scenarios:
+In the following example, we will modify the code to generate random errors in three scenarios:
 
 - When querying products in the database using `ProductRepository`
 - When getting prices in the `PriceService`
@@ -184,7 +184,7 @@ public enum GetProductError
 }
 ```
 
-The name of the metric is `get.products.error.count`, which is a counter, and therefore will register the error count over the time. Note that the metric has a tag attached to it. This tag is called `getProductError` and will help identify which error occurred.
+The name of the metric is `get.products.error.count`, which is a counter, and therefore will register the error count over time. Note that the metric has a tag attached to it. This tag is called `getProductError` and will help identify which error occurred.
 
 This is the code for `FillAvailabilityAsync`, that when an error occurs, will register the `get.products.error.count` metric.
 
@@ -209,7 +209,7 @@ public async Task FillAvailabilityAsync(IEnumerable<Product> products)
 }
 ```
 
-Finally add the metric to the `openTelemetryBuilder` using the `AddMeter` method:
+Finally, add the metric to the `openTelemetryBuilder` using the `AddMeter` method:
 
 ```csharp
 var customMetricsNames = new string[] { ProductsMetrics.Name };
@@ -227,7 +227,7 @@ The next step is to create a query and a visualization for this metric. This is 
 increase(get_products_error_count_total{getProductError="FillPrices"}[5m])
 ```
 
-At the Grafana dashboard we can visualize error counts for the three specified errors:
+At the Grafana dashboard, we can visualize error counts for the three specified errors:
 
 ![Grafana get products error count](https://raw.githubusercontent.com/sylvester-henrique/hashnode-articles/main/Drafts/get-products-error-count-grafana.png)
 
@@ -235,10 +235,10 @@ We can see that at `18:04:00` the count for `QueryProducts` error was ≈ 3.33, 
 
 ### Conclusion
 
-We have seen the request duration metric, which later can be very useful for querying request duration average, and visualize request count for multiple endpoints. This information will help us to identify which endpoints have the high average durations, and which endpoints have the higher number of requests. Combining these two information we can take action to optimize performance of critical endpoints with high numbers of requests that also have high average request duration. 
+We have seen the request duration metric, which later can be very useful for querying request duration averages, and visualize request counts for multiple endpoints. This information will help us to identify which endpoints have the high average durations, and which endpoints have the higher number of requests. Combining these two information we can take action to optimize the performance of critical endpoints with high numbers of requests that also have high average request duration. 
 
-We have also seen the error count metric, which is a custom metric for the application. With this information, we could take actions to reduce specific errors that are occurring the most, in order to increase the resilience of the application.
+We have also seen the error count metric, which is a custom metric for the application. With this information, we could take actions to reduce specific errors that are occurring the most, to increase the resilience of the application.
 
-Another scenario is when degradation incidents occur. Those metrics can help us to identify which point of the application is responsible for the degradation. In addition, Grafana provides a way to alarm when a metric surpases a determined threshold, which can indicate that an application will begin to degrade soon.
+Another scenario is when degradation incidents occur. Those metrics can help us to identify which point of the application is responsible for the degradation. In addition, Grafana provides a way to alarm when a metric surpasses a determined threshold, which can indicate that an application will begin to degrade soon.
 
 The code shown here can be found at this repository: https://github.com/sylvester-henrique/asp-net-core-metrics-example-1.
