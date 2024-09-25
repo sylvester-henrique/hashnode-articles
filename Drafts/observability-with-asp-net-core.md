@@ -58,7 +58,7 @@ I highlight three points:
 
 ### Prometheus
 
-Now that the application is instrumenting the metrics, we need a system to collect them. We will be using Prometheus, which uses a pulling system to collect the metrics of an application. The process of collecting metrics is called scrapping. In order for Prometheus to scrap the metrics it is necessary to configure an exporter, that will provide an endpoint for the scrapping. Then, we will install the package to configure the exporter endpoint:
+Now that the application is instrumenting the metrics, we need a system to collect them. We will be using Prometheus, which uses a pulling system to collect the metrics of an application. The process of collecting metrics is called scrapping. In order for Prometheus to scrap the metrics it is necessary to configure an exporter, that will provide an endpoint for the scrapping. That said, we will install the package to configure the exporter endpoint:
 
 `OpenTelemetry.Exporter.Prometheus.AspNetCore`
 
@@ -111,21 +111,21 @@ Note that at `21:10:50` the request duration average was ≈ `1.62` seconds.
 
 ### Grafana
 
-Although it is possible to build graphs for our metrics using Prometheus, as seen previously, we also can use Grafana for that, which has a more robust system for creating monitoring dashboards, alerts, and has a richer user interface.
+Although it is possible to build graphs for our metrics using Prometheus, as seen previously, we also can use Grafana for that. Besides, Grafana has a more robust system for creating monitoring dashboards, alerts, and has a richer user interface.
 
 After installing Grafana, we need to configure a datasource in which it will be getting the monitoring data. In Grafana's datasource configuration choose Prometheus, and specify our Prometheus endpoint which is `http://localhost:9090`.
 
-Now, we'll be creating a dashboard for the request duration metric. One way of viewing samples of request duration over time is using the `histogram_quantile` funcion. The first param for this function is the percentile. For example, when the percentile 90 shows 2 seconds, this indicates that 90% of the request took below 2 seconds, while only 10% took 2 seconds or more. For example, this is the query for percentile 90 (P90):
+Now, we'll be creating a dashboard for the request duration metric. One way of viewing samples of request duration over time is using the `histogram_quantile` funcion. The first param for this function is the percentile. For example, when the percentile 95 shows 2 seconds, this indicates that 95% of the request took below 2 seconds, while only 5% took 2 seconds or more. For example, this is the query for percentile 95 (P95):
 
 ```
-histogram_quantile(0.9, sum by(le) (rate(http_server_request_duration_seconds_bucket{http_route="api/Products", http_response_status_code="200"}[$__rate_interval])))
+histogram_quantile(0.95, sum by(le) (increase(http_server_request_duration_seconds_bucket{http_route="api/Products", http_response_status_code="200"}[5m])))
 ```
 
 In a single Grafana dashboard, we will specify three queries similar to that, one for percentile 90 (P90), and other two for P95 and P99:
 
 ![Grafana http server request duration](https://raw.githubusercontent.com/sylvester-henrique/hashnode-articles/main/Drafts/http-server-request-duration-grafana.png)
 
-As we can see at `18:14:15` 90% of the request durations took less than `2.41` seconds. This dashboard is very useful to give an overview of how most of the clients of the API are experiencing it in terms of request duration.
+As we can see in the yellow line, at `18:14:15` 95% of the request durations took less than `2.41` seconds. This dashboard is very useful to give an overview of how most of the clients of the API are experiencing it in terms of request duration.
 
 ### Custom metrics
 
@@ -227,18 +227,18 @@ The next step is to create a query and a visualization for this metric. This is 
 increase(get_products_error_count_total{getProductError="FillPrices"}[5m])
 ```
 
-In the Grafana dashboard we can visualize error counts for the three specified errors:
+At the Grafana dashboard we can visualize error counts for the three specified errors:
 
 ![Grafana get products error count](https://raw.githubusercontent.com/sylvester-henrique/hashnode-articles/main/Drafts/get-products-error-count-grafana.png)
 
-We can see that at `18:04:00` the count for `QueryProducts` error was ≈ 3, the count for `FillPrices` error was ≈ 2, while there was no `FillAvailability` errors. 
+We can see that at `18:04:00` the count for `QueryProducts` error was ≈ 3.33, the count for `FillPrices` error was ≈ 2, while there was no `FillAvailability` errors. 
 
 ### Conclusion
 
-We have seen the request duration metric, which later can be very useful for querying request duration average, and request count for multiple endpoints. This information will help us to identify which endpoints have the high average durations, and which endpoints have the higher number of requests. Combining these two information we can take action to optimize performance of critical endpoints with high numbers of requests that also have high average request duration. 
+We have seen the request duration metric, which later can be very useful for querying request duration average, and visualize request count for multiple endpoints. This information will help us to identify which endpoints have the high average durations, and which endpoints have the higher number of requests. Combining these two information we can take action to optimize performance of critical endpoints with high numbers of requests that also have high average request duration. 
 
 We have also seen the error count metric, which is a custom metric for the application. With this information, we could take actions to reduce specific errors that are occurring the most, in order to increase the resilience of the application.
 
 Another scenario is when degradation incidents occur. Those metrics can help us to identify which point of the application is responsible for the degradation. In addition, Grafana provides a way to alarm when a metric surpases a determined threshold, which can indicate that an application will begin to degrade soon.
 
-This code shown here can be found in this repository: https://github.com/sylvester-henrique/asp-net-core-metrics-example-1.
+The code shown here can be found at this repository: https://github.com/sylvester-henrique/asp-net-core-metrics-example-1.
