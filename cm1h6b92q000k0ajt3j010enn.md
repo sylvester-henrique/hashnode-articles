@@ -1,8 +1,8 @@
 ---
-title: "Observability with .ASP NET Core using OpenTelemetry, Prometheus and Grafana"
+title: "Observability with ASP.NET Core using OpenTelemetry, Prometheus and Grafana"
 datePublished: Wed Sep 25 2024 01:15:20 GMT+0000 (Coordinated Universal Time)
 cuid: cm1h6b92q000k0ajt3j010enn
-slug: observability-with-asp-net-core-using-opentelemetry-prometheus-and-grafana
+slug: observability-with-aspnet-core-using-opentelemetry-prometheus-and-grafana
 cover: https://cdn.hashnode.com/res/hashnode/image/stock/unsplash/npxXWgQ33ZQ/upload/f6ca531336cc0dca7d992ef52c233d4c.jpeg
 tags: prometheus, grafana, opentelemetry
 
