@@ -25,7 +25,7 @@ public async Task<IActionResult> GetAsync()
 
 The next step is to configure the application to generate metrics. Open Telemetry will be used for that, which is an open-source platform for observability, it is technology agnostic, supports logs, metrics and distributed tracings. ASP NET Core has its Open Telemetry implementation, we add it by installing the following packages:
 
-```
+```csharp
 OpenTelemetry.Instrumentation.AspNetCore
 OpenTelemetry.Extensions.Hosting
 OpenTelemetry.Exporter.Console
@@ -60,7 +60,9 @@ I highlight three points:
 
 Now that the application is instrumenting the metrics, we need a system to collect them. We will be using Prometheus, which uses a pulling system to collect the metrics of an application. The process of collecting metrics is called scrapping. In order for Prometheus to scrap the metrics it is necessary to configure an exporter, that will provide an endpoint for the scrapping. That said, we will install the package to configure the exporter endpoint:
 
-`OpenTelemetry.Exporter.Prometheus.AspNetCore`
+```csharp
+OpenTelemetry.Exporter.Prometheus.AspNetCore
+```
 
 Add the `AddPrometheusExporter` call to the dependency injection container:
 
