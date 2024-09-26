@@ -58,7 +58,7 @@ This configuration adds some metrics by default. We will be looking at the one c
 
 As we have added the `AddConsoleExporter` to the configuration, a console exporter will be available. An exporter is a way of accessing the snapshot of the metrics at a given time. The console exporter will output the metrics from time to time. This is the console output after making three request to the `/api/Producs` endpoint:
 
-![Console exporter](https://raw.githubusercontent.com/sylvester-henrique/hashnode-articles/main/Drafts/http-server-request-duration-console.png align="left")
+![Console exporter](https://raw.githubusercontent.com/sylvester-henrique/blog-posts/refs/heads/main/Observability%20with%20ASP.NET%20Core%20using%20OpenTelemetry%2C%20Prometheus%20and%20Grafana/http-server-request-duration-console.png)
 
 I highlight three points:
 
@@ -120,7 +120,7 @@ increase(http_server_request_duration_seconds_count{http_route='api/Products',ht
 
 First, the query calculates the increase of the sum of all request durations in an interval of 5 minutes. Then, it calculates the increase in the last 5 minutes, of count of all requests. Finally, it divides those values to get the average request duration in the informed interval. This is the resultant Prometheus graph:
 
-![Prometheus graph](https://raw.githubusercontent.com/sylvester-henrique/hashnode-articles/main/Drafts/http-server-request-duration-prometheus.png align="left")
+![Prometheus graph](https://raw.githubusercontent.com/sylvester-henrique/blog-posts/refs/heads/main/Observability%20with%20ASP.NET%20Core%20using%20OpenTelemetry%2C%20Prometheus%20and%20Grafana/http-server-request-duration-prometheus.png)
 
 Note that at `21:10:50` the request duration average was ≈ `1.62` seconds.
 
@@ -138,7 +138,7 @@ histogram_quantile(0.95, sum by(le) (increase(http_server_request_duration_secon
 
 In a single Grafana dashboard, we will specify three queries similar to that, one for percentile 90 (P90), and other two for P95 and P99:
 
-![Grafana http server request duration](https://raw.githubusercontent.com/sylvester-henrique/hashnode-articles/main/Drafts/http-server-request-duration-grafana.png align="left")
+![Grafana http server request duration](https://raw.githubusercontent.com/sylvester-henrique/blog-posts/refs/heads/main/Observability%20with%20ASP.NET%20Core%20using%20OpenTelemetry%2C%20Prometheus%20and%20Grafana/http-server-request-duration-grafana.png)
 
 As we can see in the yellow line, at `18:14:15` 95% of the request durations took less than `2.41` seconds. This dashboard is very useful to give an overview of how most of the clients of the API are experiencing it in terms of request duration.
 
@@ -247,7 +247,7 @@ increase(get_products_error_count_total{getProductError="FillPrices"}[5m])
 
 At the Grafana dashboard, we can visualize error counts for the three specified errors:
 
-![Grafana get products error count](https://raw.githubusercontent.com/sylvester-henrique/hashnode-articles/main/Drafts/get-products-error-count-grafana.png align="left")
+![Grafana get products error count](https://raw.githubusercontent.com/sylvester-henrique/blog-posts/refs/heads/main/Observability%20with%20ASP.NET%20Core%20using%20OpenTelemetry%2C%20Prometheus%20and%20Grafana/get-products-error-count-grafana.png)
 
 We can see that at `18:04:00` the count for `QueryProducts` error was ≈ 3.33, the count for `FillPrices` error was ≈ 2, while there was no `FillAvailability` errors.
 
